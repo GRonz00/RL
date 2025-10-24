@@ -16,7 +16,7 @@ gamma = 0.99
 lr = 1e-3
 batch_size = 64
 memory_size = 100000
-epsilon_start = 1.0
+epsilon_start = 0.01#1.0
 epsilon_end = 0.01
 epsilon_decay = 0.995
 num_episodes = 4000
@@ -49,7 +49,7 @@ def train_dqn(reset=True,ew=False):
 
     q_net = QNetwork(state_dim, action_dim)
     if not reset:
-        q_net.load_state_dict(torch.load(f"dqn_ew={ew}.pth"))
+        q_net.load_state_dict(torch.load(f"dqn.pth"))
     target_net = QNetwork(state_dim, action_dim)
     target_net.load_state_dict(q_net.state_dict())
     target_net.eval()
@@ -118,7 +118,7 @@ def run_dqn(ew=False,human= False):
         test_env = gym.make("LunarLander-v3", enable_wind = ew,render_mode="human")
     else:
         test_env = gym.make("LunarLander-v3", enable_wind = ew)
-    num_test_episodes = 10
+    num_test_episodes = 100
     q_net = QNetwork(state_dim, action_dim)
     q_net.load_state_dict(torch.load(f"dqn_ew={ew}.pth"))
 
@@ -138,10 +138,10 @@ def run_dqn(ew=False,human= False):
             total_reward += reward
             timesteps += 1
         r.append(total_reward)
-        print(f"Test episode {episode+1}: reward = {total_reward:.1f}, timesteps = {timesteps}")
-        print(np.mean(r))
+        #print(f"Test episode {episode+1}: reward = {total_reward:.1f}, timesteps = {timesteps}")
+    print(np.mean(r))
 
     test_env.close()
 if __name__ == "__main__":
-    #train_dqn(ew=True)
+    #train_dqn(ew=False,reset=False)
     run_dqn(ew=True,human=False)

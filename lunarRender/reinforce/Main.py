@@ -2,40 +2,38 @@ import gymnasium as gym
 import numpy as np
 import torch
 
-from NN import Actor
-from ACTD0 import train_actd0
+from Baseline import train_reinforce_baseline
+from Net import Network
 
-def run(actor_path,n_run=5,human=False,ew=False):
+
+def run(actor_path,n_run=10,human=False):
     if human:
-        env = gym.make("LunarLander-v3", render_mode="human",enable_wind=ew)
+        env = gym.make("LunarLander-v3", render_mode="human")
     else:
-        env = gym.make("LunarLander-v3", render_mode="human",enable_wind=ew)
+        env = gym.make("LunarLander-v3", render_mode="human")
     state_dim = env.observation_space.shape[0]
     action_dim = env.action_space.n
-    actor = Actor(state_dim, action_dim)
-    actor.load_state_dict(torch.load(actor_path))
-    r= []
+    net = Network(state_dim, action_dim)
+    net.load_state_dict(torch.load(actor_path))
+    r = []
     for _ in range(n_run):
         state, _ = env.reset()
         end_ep = False
         total_reward = 0
 
-
         while not end_ep :
             state_tensor = torch.FloatTensor(state)
             with torch.no_grad():
-                probs = actor(state_tensor)
+                probs = net(state_tensor)
                 action = torch.argmax(probs).item()
             state, reward, done, truncated, info = env.step(action)
             end_ep = done or truncated
             total_reward += reward
-
-        print(f"Reward totale = {total_reward:.1f}")
         r.append(total_reward)
-    print(f"Reward episodio medio: {np.mean(r)}")
-
+        print(f"\nReward totale = {total_reward:.1f}")
+    print(f"Reward inferenza medio: {np.mean(r)}")
     env.close()
 
 if __name__ == "__main__":
-    train_actd0(n_ep=4000)
-    #run("actor_td_lambda.pth")
+    train_reinforce_baseline(n_ep=5000)
+    #run("policy.pth")

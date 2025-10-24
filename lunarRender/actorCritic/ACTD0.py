@@ -69,7 +69,7 @@ def train_actd0(n_ep=2000,restart = True,ew=False):
             print("\nModelli salvati")
 
 
-    # --- Salvataggio dei pesi ---
+
     with open(f'td0_train_ew={ew}.json', 'w') as f:
         json.dump(rewards, f)
     torch.save(actor.state_dict(), f"actor_td0_ew={ew}.pth")

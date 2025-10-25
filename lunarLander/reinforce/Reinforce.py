@@ -14,13 +14,8 @@ def train_reinforce(n_ep=2000, restart=True):
         net.load_state_dict(torch.load("reinforce.pth"))
     learning_rate = 1e-4
     gamma = 0.99
-    eps = 1e-6  # small number for mathematical stability
-
-
     optimizer = torch.optim.Adam(net.parameters(), lr=learning_rate)
-
     r=[]
-
     for episode in range(n_ep):
         state, _ = env.reset()
         end_ep,total_reward = False,0
@@ -44,11 +39,8 @@ def train_reinforce(n_ep=2000, restart=True):
             probs.append(log_prob)
 
             state = next_state
-        """Updates the policy network's weights."""
         running_g = 0
-        gs = []
-
-        # Discounted return (backwards) - [::-1] will return an array in reverse
+        gs = [] #ritorni scontati
         for R in rewards[::-1]:
             running_g = R + gamma * running_g
             gs.insert(0, running_g)
@@ -56,12 +48,8 @@ def train_reinforce(n_ep=2000, restart=True):
         deltas = torch.tensor(gs)
 
         log_probs = torch.stack(probs).squeeze()
-
-        # Update the loss with the mean log probability and deltas
-        # Now, we compute the correct total loss by taking the sum of the element-wise products.
         loss = -torch.sum(log_probs * deltas)
 
-        # Update the policy network
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -76,6 +64,5 @@ def train_reinforce(n_ep=2000, restart=True):
 
     with open('reinforce_train.json', 'w') as f:
         json.dump(r, f)
-    # --- Salvataggio dei pesi ---
     torch.save(net.state_dict(), "reinforce.pth")
     print("Modelli salvati")

@@ -8,7 +8,7 @@ import random
 import numpy as np
 from collections import deque
 from NN import QNetwork
-
+from gymnasium.wrappers import RecordEpisodeStatistics, RecordVideo
 
 state_dim = 8
 action_dim = 4
@@ -115,17 +115,27 @@ def train_dqn(reset=True,ew=False):
 
 def run_dqn(ew=False,human= False):
     if human:
-        test_env = gym.make("LunarLander-v3", enable_wind = ew,render_mode="human")
+        env = gym.make("LunarLander-v3",enable_wind=ew,render_mode="rgb_array")
+        # Add video recording for every episode
+        env = RecordVideo(
+            env,
+            video_folder=f"dqn-agent_ew={ew}",    # Folder to save videos
+            name_prefix="eval",               # Prefix for video filenames
+            episode_trigger=lambda x: True    # Record every episode
+        )
+
+        # Add episode statistics tracking
+        env = RecordEpisodeStatistics(env, buffer_length=4)
     else:
-        test_env = gym.make("LunarLander-v3", enable_wind = ew)
-    num_test_episodes = 100
+        env = gym.make("LunarLander-v3", enable_wind = ew)
+    num_test_episodes = 4
     q_net = QNetwork(state_dim, action_dim)
     q_net.load_state_dict(torch.load(f"dqn_ew={ew}.pth"))
 
     q_net.eval()
     r = []
     for episode in range(num_test_episodes):
-        state, _ = test_env.reset()
+        state, _ = env.reset()
         done, truncated = False, False
         total_reward = 0
         timesteps = 0
@@ -134,14 +144,18 @@ def run_dqn(ew=False,human= False):
             state_tensor = torch.FloatTensor(state)
             with torch.no_grad():
                 action = torch.argmax(q_net(state_tensor)).item()
-            state, reward, done, truncated, info = test_env.step(action)
+            state, reward, done, truncated, info = env.step(action)
             total_reward += reward
             timesteps += 1
         r.append(total_reward)
-        #print(f"Test episode {episode+1}: reward = {total_reward:.1f}, timesteps = {timesteps}")
+        print(f"Test episode {episode+1}: reward = {total_reward:.1f}, timesteps = {timesteps}")
     print(np.mean(r))
 
-    test_env.close()
+    env.close()
 if __name__ == "__main__":
+    seed = 42
+    torch.manual_seed(seed)
+    np.random.seed(seed)
     #train_dqn(ew=False,reset=False)
-    run_dqn(ew=True,human=False)
+
+    run_dqn(ew=True,human=True)

@@ -47,7 +47,7 @@ def generate_episode(track,pi,eps):
         for y in range(s1, s1 + new_vv + step, step): #la macchina si muove prima verticalmente, controllo non sbatta
             if not 0<= y <N2 or track[y,s2]==-1: #va fuori dal tracciato
                 if not REWARD_FISSO:
-                    episode.append([stato_attuale,azione_presa,-10])
+                    episode.append([stato_attuale,azione_presa,-20])
                 s2 = get_start_point(track)
                 s1=0
                 vv=0
@@ -70,7 +70,7 @@ def generate_episode(track,pi,eps):
         for x in range(s2, s2 + new_vo + step, step):
             if not 0<= x <N1 or track[s1,x]==-1: #va fuori dal tracciato
                 if not REWARD_FISSO:
-                    episode.append([stato_attuale,azione_presa,-1])
+                    episode.append([stato_attuale,azione_presa,-20])
                 s2 = get_start_point(track)
                 s1=0
                 vv = 0
@@ -84,7 +84,7 @@ def generate_episode(track,pi,eps):
                 break
             if track[s1,x]==2: #arrivata alla fine
                 if not REWARD_FISSO:
-                    episode.append([stato_attuale,azione_presa,30])
+                    episode.append([stato_attuale,azione_presa,50])
                 end=True
                 break
         if stop:
@@ -114,11 +114,11 @@ def MC(track):
     # monitoraggio
     avg_returns = []
     avg_lengths = []
-    eps_initial = 0.1
+    eps = 1
+    eps_end = 0.01
+    decay_rate = 0.9995
     for el in range(100_000):#numero episodi
         #print("episodio "+str(el))
-        decay_rate = 0.99995
-        eps = eps_initial * decay_rate**el
 
         episode = generate_episode(track,pi,eps)
         G=0
@@ -136,6 +136,7 @@ def MC(track):
         avg_returns.append(total_return)
         avg_lengths.append(len(episode))
 
+        eps = max(eps_end, eps * decay_rate)
         if (el+1) % 1000 == 0:
             print(f"[Episodio {el+1}] "
                   f"Lunghezza media: {np.mean(avg_lengths[-50:]):.1f}, "

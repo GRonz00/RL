@@ -75,7 +75,7 @@ def train_actd_lambda(n_ep=2000, restart=True, lambda_theta=0.9, lambda_w=0.9):
             optimizer_actor.zero_grad()
             optimizer_critic.zero_grad()
 
-            # --- accumula i gradienti
+            # accumula i gradienti
             for p, z in zip(actor.parameters(), z_theta):
                 p.grad = -delta.detach() * z  # segno negativo perché max J
             for p, z in zip(critic.parameters(), z_w):

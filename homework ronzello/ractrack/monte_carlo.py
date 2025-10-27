@@ -115,9 +115,9 @@ def MC(track):
     avg_returns = []
     avg_lengths = []
     eps_initial = 0.1
-    for el in range(5000):#numero episodi
+    for el in range(100_000):#numero episodi
         #print("episodio "+str(el))
-        decay_rate = 0.9995
+        decay_rate = 0.99995
         eps = eps_initial * decay_rate**el
 
         episode = generate_episode(track,pi,eps)
@@ -147,13 +147,13 @@ def graf(pi, Q, avg_returns, avg_lengths):
 
     N1, N2, A = Q.shape
 
-    # Creiamo la griglia di coordinate per il grafico
+
     x = np.arange(N2)
     y = np.arange(N1)
     X, Y = np.meshgrid(x, y)
     actions = [(ao, av) for ao in [-1, 0, 1] for av in [-1, 0, 1]]
 
-    # matrice di vettori per visualizzare la direzione della policy
+
     U = np.zeros_like(pi, dtype=float)  # componente orizzontale
     Vdir = np.zeros_like(pi, dtype=float)  # componente verticale
 
@@ -162,9 +162,9 @@ def graf(pi, Q, avg_returns, avg_lengths):
             if track[i, j] != -1:
                 ao, av = actions[pi[i, j]]
                 U[i, j] = ao
-                Vdir[i, j] = -av  # inverti per coerenza con assi immagine
+                Vdir[i, j] = -av
 
-    # Grafico policy come campo vettoriale (freccette)
+    # Grafico policy come campo vettoriale
     plt.figure(figsize=(14, 6))
 
     plt.subplot(1, 2, 1)
@@ -364,7 +364,9 @@ def run_policy_visual(track, pi, max_steps=500, interval=200, Vmax=5, save=False
 if __name__ == "__main__":
     N1=20
     N2=20
+    np.random.seed(42)
     track = create_track(N1,N2)
+
 
     pi, Q, returns, lengths = MC(track)
     graf(pi, Q, returns, lengths)

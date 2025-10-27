@@ -19,8 +19,8 @@ def train_reinforce(n_ep=2000, restart=True):
     for episode in range(n_ep):
         state, _ = env.reset()
         end_ep,total_reward = False,0
-        probs = []  # Stores probability values of the sampled action
-        rewards = []  # Stores the corresponding rewards
+        probs = []
+        rewards = []
 
         while not end_ep:
             state_tensor = torch.FloatTensor(state)

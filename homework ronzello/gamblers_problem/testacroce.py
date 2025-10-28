@@ -20,7 +20,8 @@ def vi():
             v = V[s]
             A = np.zeros(min(s,goal-s))#ha senso puntare solo fino all'obiettivo
             for a in range(1,min(s,goal-s)+1):
-                A[a-1]=p*(R[s+a]+gamma*V[s+a])+(1-p)*(R[max(0,s-a)]+gamma*V[max(0,s-a)]) #vincita + perdita
+                A[a-1]=(p*(R[s+a]+gamma*V[s+a])+
+                        (1-p)*(R[max(0,s-a)]+gamma*V[max(0,s-a)])) #vincita + perdita
             V[s]=max(A)
             delta=max(delta,abs(v-V[s]))
         if delta<theta:
@@ -71,7 +72,6 @@ def pi():
                 v = V[s]
                 V[s]= V[s] = p * (R[min(goal, s + pi[s])] + gamma * V[min(goal, s + pi[s])]) \
                              + (1 - p) * (R[max(0, s - pi[s])] + gamma * V[max(0, s - pi[s])])
-
                 delta=max(delta,abs(v-V[s]))
             if delta<theta:
                 break
@@ -80,11 +80,10 @@ def pi():
         for s in range(1, goal):
             x = -np.inf
             old_a=pi[s]
-
             max_a = 0
             for a in range(1, min(s, goal - s) + 1):
-                y = 0.5 * (R[s + a] + gamma * V[s + a]) + \
-                    0.5 * (R[max(0, s - a)] + gamma * V[max(0, s - a)])
+                y = p * (R[s + a] + gamma * V[s + a]) + \
+                    (1-p) * (R[max(0, s - a)] + gamma * V[max(0, s - a)])
                 if y > x:
                     x = y
                     max_a = a

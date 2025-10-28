@@ -5,7 +5,8 @@ dim_A = 5
 Action = ["scissor","paper","rock","lizard","spock"]
 T = 400
 eps_agent = 0.1
-eps_player = 0.9
+eps_player = 0.8
+N=80
 def epsilon_greedy(Q):
     if np.random.random() < eps_agent:
         a = np.random.randint(0,dim_A)
@@ -23,13 +24,12 @@ def non_stationary_player(t):
     if np.random.random() < eps_player:
         a = np.random.randint(0,dim_A)
     else:
-        a = int(t/80) % 5  #ogni 80 giocate cambia la sua mossa preferita
+        a = int(t/N) % 5    #ogni 80 giocate cambia la sua mossa preferita
     return a
 
 def play_eps(sta=True):
     Q = np.zeros((dim_A,T))
     N = np.zeros((dim_A,T))
-
     alp=0.1
     for t in range(T-1):
         a_agent = epsilon_greedy(Q[:,t])
@@ -101,7 +101,6 @@ def play_ucb(sta=True):
 
     fig.savefig(f"ucb_stationary={sta}.png", dpi=300)
 
-
 def preference_update(sta = True):
     H = np.zeros(dim_A)
     historyH = np.zeros((dim_A, T))
@@ -122,10 +121,10 @@ def preference_update(sta = True):
 
         # Aggiornamento reward medio
         bR = bR + beta * (r - bR)
-
+        temp = H[a]
         # Aggiornamento preferenze
         H = H - alpha * (r - bR) * Prob
-        H[a] = H[a] + alpha * (r - bR) * (1 - Prob[a])
+        H[a] = temp + alpha * (r - bR) * (1 - Prob[a])
 
 
         historyH[:, t] = H
